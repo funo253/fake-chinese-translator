@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>単語取説ページ</title>
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // 単語データ（例）
+    const wordData = {
+      "いぬ": {
+        meaning: "犬の意味",
+        usage: "いぬは動物の一種です。"
+      },
+      "ねこ": {
+        meaning: "猫の意味",
+        usage: "ねこはかわいい動物です。"
+      },
+      "ごはん": {
+        meaning: "ごはんの意味",
+        usage: "ごはんを食べることは健康的です。"
+      }
+    };
+
+    function searchWord() {
+      const query = document.getElementById("search-input").value.toLowerCase();
+      const result = document.getElementById("result");
+      result.innerHTML = ""; // 前の結果をリセット
+
+      // 単語検索
+      for (const word in wordData) {
+        if (word.includes(query)) {
+          const wordInfo = wordData[word];
+          const wordElement = document.createElement("div");
+          wordElement.classList.add("word-item");
+
+          wordElement.innerHTML = `
+            <h3>${word}</h3>
+            <p><strong>意味:</strong> ${wordInfo.meaning}</p>
+            <p><strong>使い方:</strong> ${wordInfo.usage}</p>
+          `;
+
+          result.appendChild(wordElement);
+        }
+      }
+
+      if (result.innerHTML === "") {
+        result.innerHTML = "<p>該当する単語は見つかりませんでした。</p>";
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>単語取説ページ</h1>
+    <div id="search-container">
+      <input type="text" id="search-input" placeholder="検索する単語を入力">
+      <button id="search-btn" onclick="searchWord()">検索</button>
+    </div>
+
+    <div id="result">
+      <!-- 検索結果がここに表示される -->
+    </div>
+
+    <!-- メインページへのリンク -->
+    <div id="main-page-link">
+      <a href="index.html">偽中国語翻訳サイトへ戻る</a>
+    </div>
+  </div>
+</body>
+</html>
