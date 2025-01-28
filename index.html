@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>偽中国語翻訳サイト</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f8ff;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin-top: 50px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #4CAF50;
+    }
+
+    textarea,
+    input,
+    select,
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    textarea {
+      height: 150px;
+      resize: none;
+      font-size: 18px;
+    }
+
+    select {
+      background-color: #f9f9f9;
+    }
+
+    button {
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #add-block-btn,
+    #add-btn,
+    #translate-btn {
+      margin-top: 15px;
+      background-color: #008CBA;
+      color: white;
+    }
+
+    #add-block-btn:hover,
+    #add-btn:hover,
+    #translate-btn:hover {
+      background-color: #007bb5;
+    }
+
+    .block {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      margin-bottom: 12px;
+      background-color: #f1f1f1;
+      border-radius: 6px;
+    }
+
+    .block input,
+    .block select {
+      width: 60%;
+    }
+
+    .remove-block {
+      background-color: #f44336;
+      color: white;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      border: none;
+    }
+
+    .remove-block:hover {
+      background-color: #e53935;
+    }
+
+    #output {
+      background-color: #f9f9f9;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 20px;
+      border: 1px solid #ddd;
+    }
+
+    #output h2 {
+      color: #333;
+    }
+
+    #output-text {
+      font-size: 18px;
+      line-height: 1.5;
+      color: #444;
+    }
+
+    .input-container {
+      margin-bottom: 30px;
+    }
+
+    .input-container h3 {
+      color: #4CAF50;
+      font-size: 20px;
+    }
+
+    #add-word input {
+      width: 48%;
+      margin-right: 2%;
+    }
+
+    .notification {
+      color: #d9534f;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>偽中国語翻訳サイト</h1>
+    
+    <div class="input-container">
+      <h3>日本語を入力</h3>
+      <textarea id="input-text" placeholder="ここに日本語を入力"></textarea>
+    </div>
+    
+    <div id="blocks-container">
+      <!-- 動的に追加される単語ブロックがここに表示される -->
+    </div>
+    
+    <button id="add-block-btn">ブロックを追加</button>
+
+    <div id="add-word">
+      <h3>単語を追加</h3>
+      <input type="text" id="word" placeholder="単語（日本語）">
+      <input type="text" id="translation" placeholder="翻訳（偽中国語）">
+      <button id="add-btn">追加</button>
+    </div>
+
+    <button id="translate-btn">変換する</button>
+
+    <div id="output">
+      <h2>翻訳結果</h2>
+      <p id="output-text"></p>
+    </div>
+
+    <div id="notification" class="notification"></div>
+  </div>
+
+  <script>
+    let dictionaries = {
+      "animal": {
+        "いぬ": ["犬", "狗"],
+        "ねこ": ["猫", "貓"]
+      },
+      "food": {
+        "ごはん": ["飯", "米飯", "白飯"],
+        "たべる": ["食", "吃"]
+      }
+    };
+
+    let currentDictionary = "animal";  // デフォルト辞書
+
+    // 辞書を切り替える関数
+    function changeDictionary(dictionaryName) {
+      currentDictionary = dictionaryName;
+      console.log("現在の辞書:", currentDictionary);
+    }
+
+    // 「ブロックを追加」ボタンを押したときに新しいブロックを追加する
+    document.getElementById("add-block-btn").addEventListener("click", () => {
+      const blockContainer = document.getElementById("blocks-container");
+
+      // 新しいブロックを作成
+      const block = document.createElement("div");
+      block.classList.add("block");
+
+      // 単語を入力するフィールドを作成
+      const wordInput = document.createElement("input");
+      wordInput.classList.add("word");
+      wordInput.placeholder = "単語を入力";
+
+      // 辞書を選択するセレクトメニューを作成
+      const dictionarySelector = document.createElement("select");
+      dictionarySelector.classList.add("dictionary-selector");
+      dictionarySelector.innerHTML = `
+        <option value="animal">動物辞書</option>
+        <option value="food">食べ物辞書</option>
+      `;
+
+      // 削除ボタンを作成
+      const removeBtn = document.createElement("button");
+      removeBtn.classList.add("remove-block");
+      removeBtn.innerText = "削除";
+      
+      // 削除ボタンが押されたときにそのブロックを削除する
+      removeBtn.addEventListener("click", () => {
+        blockContainer.removeChild(block);
+      });
+
+      // ブロックに要素を追加
+      block.appendChild(wordInput);
+      block.appendChild(dictionarySelector);
+      block.appendChild(removeBtn);
+
+      // ブロックをブロックコンテナに追加
+      blockContainer.appendChild(block);
+    });
+
+    // 翻訳ボタンが押されたときに、ブロック内の単語を翻訳する
+    document.getElementById("translate-btn").addEventListener("click", () => {
+      const blocks = document.querySelectorAll(".block");
+      let translatedText = "";
+
+      // それぞれのブロックについて
+      blocks.forEach(block => {
+        const word = block.querySelector(".word").value;  // 単語
+        const selectedDictionary = block.querySelector(".dictionary-selector").value;  // 辞書
+
+        // 辞書に単語が存在するか確認
+        if (dictionaries[selectedDictionary][word]) {
+          const options = dictionaries[selectedDictionary][word];
+          translatedText += options[Math.floor(Math.random() * options.length)] + " ";
+        } else {
+          translatedText += word + " ";  // 辞書にない単語はそのまま表示
+        }
+      });
+
+      // 翻訳結果を表示
+      document.getElementById("output-text").innerText = translatedText;
+    });
+
+    // 辞書に単語を追加
+    document.getElementById("add-btn").addEventListener("click", () => {
+      const word = document.getElementById("word").value;
+      const translation = document.getElementById("translation").value;
+
+      if (!word || !translation) {
+        alert("単語と翻訳を入力してください。");
+        return;
+      }
+
+      if (!dictionaries[currentDictionary][word]) {
+        dictionaries[currentDictionary][word] = [];
+      }
+
+      // 翻訳を追加
+      dictionaries[currentDictionary][word].push(translation);
+
+      // ローカルストレージに保存（オプション）
+      localStorage.setItem("dictionaries", JSON.stringify(dictionaries));
+
+      alert("単語が追加されました！");
+    });
+  </script>
+</body>
+</html>
